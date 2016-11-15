@@ -4,13 +4,18 @@ import android.graphics.Bitmap;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
+import android.util.Log;
 import android.view.View;
+import android.webkit.ConsoleMessage;
+import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.TextView;
+
+import com.minhld.httpd.AsslWebServer;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -32,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
     TextView logText;
 
     long startTime = 0;
-    final SimpleDateFormat SDF = new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
+    final SimpleDateFormat SDF = new SimpleDateFormat("HH:mm:ss.SSS");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,6 +89,26 @@ public class MainActivity extends AppCompatActivity {
                 startTime = 0;
             }
         });
+
+        webView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
+                writeLog(consoleMessage.lineNumber() + ": " + consoleMessage.message());
+                return super.onConsoleMessage(consoleMessage);
+            }
+        });
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        AsslWebServer.stopServer();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        AsslWebServer.startServer(this);
     }
 
     private void preload() {
