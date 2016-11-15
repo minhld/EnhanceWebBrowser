@@ -5,10 +5,15 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.text.format.Formatter;
 
+import org.apache.commons.io.IOUtils;
+
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,41 +53,10 @@ public class AsslWebServer {
 	/**
 	 * return the URL that contents are decrypted
 	 * 
-	 * @param localFile
+	 * @param url
 	 */
-	public static String getFile(String localFile) {
-		return "http://" + innerHostName + ":" + AsslHTTPD.SERVER_DEF_PORT +
-				(localFile.startsWith("/") ? "" : "/") + localFile;
-	}
-	
-	/**
-	 * read a file in UTF-8 format
-	 * 
-	 * @param file
-	 * @return
-	 * @throws IOException
-	 */
-	public static String readText(String file) throws IOException {
-		//StringBuilder buff=new StringBuilder();
-		List<String> buffer = new ArrayList<String>();
-		
-		try{
-			BufferedReader reader=new BufferedReader(
-					new InputStreamReader(
-							new FileInputStream(file),
-							Charset.forName("UTF-8")
-					)
-			);
-			String line="";
-			while ((line=reader.readLine())!=null){
-				//buff.append(line+"\r\n");
-				buffer.add(line+"\r\n");
-			}
-			reader.close();
-			return concatenateStrings(buffer);//buff.toString();
-		}catch(IOException e){
-			throw e;
-		}
+	public static String getUrl(String url) {
+		return "http://" + innerHostName + ":" + AsslHTTPD.SERVER_DEF_PORT + "/" + url;
 	}
 	
 	public static String concatenateStrings(List<String> items)

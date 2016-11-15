@@ -4,6 +4,8 @@ import android.content.Context;
 import android.os.Environment;
 import android.util.Log;
 
+import com.minhld.utils.Utils;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,7 +23,9 @@ public class AsslHTTPD extends NanoHTTPD {
     final String TAG = "AsslHTTPD";
 
     static final String MIME_DEFAULT_BINARY = "application/octet-stream";
-    static final Map<String,String> mimeTypes = new HashMap<String, String>() {{
+
+    static final Map<String,String> textMimes = new HashMap<String, String>() {{
+        put("", "text/html");
         put("css", "text/css");
         put("htm", "text/html");
         put("html", "text/html");
@@ -32,10 +36,16 @@ public class AsslHTTPD extends NanoHTTPD {
         put("md", "text/plain");
         put("txt", "text/plain");
         put("asc", "text/plain");
+    }};
+
+    static final Map<String,String> imageMimes = new HashMap<String, String>() {{
         put("gif", "image/gif");
         put("jpg", "image/jpeg");
         put("jpeg", "image/jpeg");
         put("png", "image/png");
+    }};
+
+    static final Map<String,String> binaryMimes = new HashMap<String, String>() {{
         put("mp3", "audio/mpeg");
         put("m3u", "audio/mpeg-url");
         put("mp4", "video/mp4");
@@ -67,43 +77,80 @@ public class AsslHTTPD extends NanoHTTPD {
 
     @Override
     public Response serve(IHTTPSession session) {
-        Response res = null;
         String uri = session.getUri();
 
-        String downloadAbsPath = Environment.getExternalStoragePublicDirectory(
-                        Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
+        if (uri.length() > 0 && uri.startsWith("/")) {
+            uri = uri.substring(1);
+        }
 
+        // if URI contains a default icon
         if (uri.contains("favicon")){
             uri = "";
         }
 
-        // Get MIME type from file name extension, if possible
+        if (uri.equals("")) return null;
+
+        // get mime-type
         String mime = MIME_DEFAULT_BINARY;
         int dot = uri.lastIndexOf('.');
+        String ext = "";
         if (dot >= 0) {
-            mime = mimeTypes.get(uri.substring(dot + 1).toLowerCase());
+            ext = uri.substring(dot + 1).toLowerCase();
         }
 
-        String eTag = "";
+        // if the URI is text
+        mime = textMimes.get(ext);
+        if (mime != null) {
+            return solveText(mime, uri);
+        }
 
-        if (uri.contains(downloadAbsPath)){
-            try{
-                InputStream is = new FileInputStream(uri);
-                res = new Response(Response.Status.OK, mime, is, is.available());
-                if (res != null){
-                    eTag = Integer.toHexString(new Random().nextInt());
-                    res.addHeader("ETag", eTag);
-                    res.addHeader("Connection", "Keep-alive");
-                    return res;
-                }
-            }catch(IOException e){
-                Log.v(TAG, e.getMessage());
+        // if the URI is image
+        mime = imageMimes.get(ext);
+        if (mime != null) {
+            return solveImage(mime, uri);
+        }
+
+        // if the URI is image
+        mime = binaryMimes.get(ext);
+        if (mime != null) {
+
+        }
+
+        // other types, will be considered as text
+        return solveText(mime, uri);
+    }
+
+    private Response solveText(String mimeType, String uri) {
+        try{
+            InputStream is = Utils.getInputStream(uri);
+            Response res = new Response(Response.Status.OK, mimeType, is, is.available());
+            if (res != null){
+                String eTag = Integer.toHexString(new Random().nextInt());
+                res.addHeader("ETag", eTag);
+                res.addHeader("Connection", "Keep-alive");
+                return res;
             }
-        } else {
-            return null;
+        }catch(IOException e){
+            Log.v(TAG, e.getMessage());
         }
-
         return null;
     }
 
+    private Response solveImage(String mimeType, String uri) {
+        Response res = null;
+        try{
+            String eTag = "";
+            InputStream is = new FileInputStream(uri);
+            res = new Response(Response.Status.OK, mimeType, is, is.available());
+            if (res != null){
+                eTag = Integer.toHexString(new Random().nextInt());
+                res.addHeader("ETag", eTag);
+                res.addHeader("Connection", "Keep-alive");
+                return res;
+            }
+        }catch(IOException e){
+            Log.v(TAG, e.getMessage());
+        }
+        return null;
+    }
 }

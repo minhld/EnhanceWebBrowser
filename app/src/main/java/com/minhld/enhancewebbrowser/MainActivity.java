@@ -117,7 +117,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void loadUrl() {
         String url = urlText.getText().toString();
-        webView.loadUrl(url);
+        String modUrl = AsslWebServer.getUrl(url);
+        webView.loadUrl(modUrl);
     }
 
     private void writeLog(final String log) {
