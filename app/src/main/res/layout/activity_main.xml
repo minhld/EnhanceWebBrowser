@@ -9,20 +9,23 @@
     <FrameLayout
         android:id="@+id/urlPanel"
         android:layout_width="match_parent"
-        android:layout_height="35dp"
+        android:layout_height="39dp"
         android:orientation="horizontal">
 
-        <TextView
+        <EditText
             android:id="@+id/urlText"
             android:layout_width="match_parent"
-            android:layout_height="35dp"
+            android:layout_height="39dp"
             android:layout_gravity="left"
-            android:layout_marginRight="50dp"/>
+            android:layout_marginRight="50dp"
+            android:textSize="15sp"
+            android:paddingTop="5dp"
+            android:paddingLeft="5dp"/>
 
         <Button
             android:id="@+id/goBtn"
             android:layout_width="50dp"
-            android:layout_height="35dp"
+            android:layout_height="39dp"
             android:text="Go"
             android:layout_gravity="right"/>
 
