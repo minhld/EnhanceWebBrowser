@@ -1,7 +1,6 @@
 package com.minhld.httpd;
 
 import android.content.Context;
-import android.os.Environment;
 import android.util.Log;
 
 import com.minhld.utils.Utils;
@@ -21,11 +20,11 @@ import java.util.Random;
 /**
  * Created by minhld on 2/20/2016.
  */
-public class AsslHTTPD extends NanoHTTPD {
+public class EnhancedHTTPD extends NanoHTTPD {
     public static final String SERVER_DEF_HOST = "localhost";
     public static final int SERVER_DEF_PORT = 3883;
 
-    final String TAG = "AsslHTTPD";
+    final String TAG = "EnhancedHTTPD";
 
     static final String MIME_DEFAULT_BINARY = "application/octet-stream";
 
@@ -67,21 +66,30 @@ public class AsslHTTPD extends NanoHTTPD {
         put("class", "application/octet-stream");
     }};
 
-    AsslHTTPD asslServer;
+    EnhancedHTTPD enhanceServer;
     Context context;
 
-    public AsslHTTPD(Context context) {
-        super(AsslHTTPD.SERVER_DEF_HOST, AsslHTTPD.SERVER_DEF_PORT);
+    public EnhancedHTTPD(Context context) {
+        super(EnhancedHTTPD.SERVER_DEF_HOST, EnhancedHTTPD.SERVER_DEF_PORT);
         this.context = context;
     }
 
-    public AsslHTTPD(Context context, String hostName, int port){
+    public EnhancedHTTPD(Context context, String hostName, int port){
         super(hostName, port);
         this.context = context;
     }
 
     @Override
     public Response serve(IHTTPSession session) {
+//        String msg = "<html><body><h1>Hello server</h1>\n";
+//        Map<String, String> parms = session.getParms();
+//        if (parms.get("username") == null) {
+//            msg += "<form action='?' method='get'>\n  <p>Your name: <input type='text' name='username'></p>\n" + "</form>\n";
+//        } else {
+//            msg += "<p>Hello, " + parms.get("username") + "!</p>";
+//        }
+//        return Response.newFixedLengthResponse(msg + "</body></html>\n");
+
         String uri = session.getUri();
 
         if (uri.length() > 0 && uri.startsWith("/")) {
@@ -129,16 +137,16 @@ public class AsslHTTPD extends NanoHTTPD {
         try{
             InputStream is = Utils.getInputStream(uri);
             Response res = Response.newFixedLengthResponse(Status.OK, mimeType, is, is.available());
-            if (res != null){
-                String eTag = Integer.toHexString(new Random().nextInt());
-                res.addHeader("ETag", eTag);
-                res.addHeader("Connection", "Keep-alive");
-                return res;
-            }
+//            if (res != null){
+//                String eTag = Integer.toHexString(new Random().nextInt());
+//                res.addHeader("ETag", eTag);
+//                return res;
+//            }
+            return res;
         }catch(IOException e){
             Log.v(TAG, e.getMessage());
+            return null;
         }
-        return null;
     }
 
     private Response solveImage(String mimeType, String uri) {
@@ -150,7 +158,6 @@ public class AsslHTTPD extends NanoHTTPD {
             if (res != null){
                 eTag = Integer.toHexString(new Random().nextInt());
                 res.addHeader("ETag", eTag);
-                res.addHeader("Connection", "Keep-alive");
                 return res;
             }
         }catch(IOException e){

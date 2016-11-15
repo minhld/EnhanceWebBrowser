@@ -4,7 +4,6 @@ import android.graphics.Bitmap;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
-import android.util.Log;
 import android.view.View;
 import android.webkit.ConsoleMessage;
 import android.webkit.WebChromeClient;
@@ -15,7 +14,7 @@ import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.minhld.httpd.AsslWebServer;
+import com.minhld.httpd.EnhancedWebServer;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -60,12 +59,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupWebview() {
-        webView.getSettings().setBuiltInZoomControls(false);
-        webView.getSettings().setAllowFileAccess(true);
-        webView.getSettings().setAllowContentAccess(true);
+//        webView.getSettings().setBuiltInZoomControls(false);
+//        webView.getSettings().setAllowFileAccess(true);
+//        webView.getSettings().setAllowContentAccess(true);
         webView.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
         webView.getSettings().setJavaScriptEnabled(true);
-        webView.getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
+        webView.getSettings().setDomStorageEnabled(true);
+        webView.setWebContentsDebuggingEnabled(true);
+
+//        webView.getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
@@ -102,13 +104,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        AsslWebServer.stopServer();
+        EnhancedWebServer.stopServer();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        AsslWebServer.startServer(this);
+        EnhancedWebServer.startServer(this);
     }
 
     private void preload() {
@@ -117,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void loadUrl() {
         String url = urlText.getText().toString();
-        String modUrl = AsslWebServer.getUrl(url);
+        String modUrl = EnhancedWebServer.getUrl(url);
         webView.loadUrl(modUrl);
     }
 

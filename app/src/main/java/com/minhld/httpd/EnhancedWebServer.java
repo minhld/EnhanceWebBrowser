@@ -5,21 +5,10 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.text.format.Formatter;
 
-import org.apache.commons.io.IOUtils;
-
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.List;
 
-public class AsslWebServer {
-	private static AsslHTTPD asslServer;
+public class EnhancedWebServer {
+	private static EnhancedHTTPD enhancedHTTPD;
 	private static String innerHostName;
 
 	public static void startServer(Context context) {
@@ -29,15 +18,15 @@ public class AsslWebServer {
 		String ipAddress = Formatter.formatIpAddress(address);
 		innerHostName = ipAddress;
 		try {
-			asslServer = new AsslHTTPD(context, ipAddress, AsslHTTPD.SERVER_DEF_PORT);
-			asslServer.start();
+			enhancedHTTPD = new EnhancedHTTPD(context, ipAddress, EnhancedHTTPD.SERVER_DEF_PORT);
+			enhancedHTTPD.start();
 		} catch (Exception e) {
 			// if port is occupied by other third parties
 			// port will be updated to a random number around the default value
-			int newPort = AsslHTTPD.SERVER_DEF_PORT + (int) (Math.random() * 200 + 1);
+			int newPort = EnhancedHTTPD.SERVER_DEF_PORT + (int) (Math.random() * 200 + 1);
 			try {
-				asslServer = new AsslHTTPD(context, AsslHTTPD.SERVER_DEF_HOST, newPort);
-				asslServer.start();
+				enhancedHTTPD = new EnhancedHTTPD(context, EnhancedHTTPD.SERVER_DEF_HOST, newPort);
+				enhancedHTTPD.start();
 			} catch (Exception ex) {
 				// no further catch, let it go
 			}
@@ -45,8 +34,8 @@ public class AsslWebServer {
 	}
 
 	public static void stopServer() {
-		if (asslServer != null) {
-			asslServer.stop();
+		if (enhancedHTTPD != null) {
+			enhancedHTTPD.stop();
 		}
 	}
 	
@@ -56,7 +45,7 @@ public class AsslWebServer {
 	 * @param url
 	 */
 	public static String getUrl(String url) {
-		return "http://" + innerHostName + ":" + AsslHTTPD.SERVER_DEF_PORT + "/" + url;
+		return "http://" + innerHostName + ":" + EnhancedHTTPD.SERVER_DEF_PORT + "/" + url;
 	}
 	
 	public static String concatenateStrings(List<String> items)
