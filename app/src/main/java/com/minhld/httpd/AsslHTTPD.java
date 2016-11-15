@@ -6,6 +6,11 @@ import android.util.Log;
 
 import com.minhld.utils.Utils;
 
+import org.nanohttpd.protocols.http.IHTTPSession;
+import org.nanohttpd.protocols.http.NanoHTTPD;
+import org.nanohttpd.protocols.http.response.Response;
+import org.nanohttpd.protocols.http.response.Status;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -123,7 +128,7 @@ public class AsslHTTPD extends NanoHTTPD {
     private Response solveText(String mimeType, String uri) {
         try{
             InputStream is = Utils.getInputStream(uri);
-            Response res = new Response(Response.Status.OK, mimeType, is, is.available());
+            Response res = Response.newFixedLengthResponse(Status.OK, mimeType, is, is.available());
             if (res != null){
                 String eTag = Integer.toHexString(new Random().nextInt());
                 res.addHeader("ETag", eTag);
@@ -141,7 +146,7 @@ public class AsslHTTPD extends NanoHTTPD {
         try{
             String eTag = "";
             InputStream is = new FileInputStream(uri);
-            res = new Response(Response.Status.OK, mimeType, is, is.available());
+            res = Response.newFixedLengthResponse(Status.OK, mimeType, is, is.available());
             if (res != null){
                 eTag = Integer.toHexString(new Random().nextInt());
                 res.addHeader("ETag", eTag);
